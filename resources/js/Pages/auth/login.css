@@ -1,0 +1,33 @@
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url('../../assets/UI.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #f8fafc;
+}
+
+.login-form {
+    width: 400px;
+    max-width: calc(100% - 2rem);
+    margin: 0 1rem;
+    padding: 2rem 1.5rem;
+    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: black;
+    text-align: left;
+    font-size: 0.875rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-form h2 {
+    margin-bottom: 2.25rem;
+    text-align: center;
+    color: #1f2937;
+    font-size: 2rem;
+    font-weight: 700;
+}
