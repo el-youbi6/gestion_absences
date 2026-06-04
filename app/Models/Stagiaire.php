@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable(['user_id', 'groupe_id'])]
 class Stagiaire extends Model
 {
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function groupe()
     {
         return $this->belongsTo(Groupe::class);

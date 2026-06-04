@@ -13,23 +13,24 @@ class loginController extends Controller
         $validate = $request->validate(
             [
                 'email' => 'required|email',
-                'password' => 'required|min:8'
+                'password' => 'required|min:8',
             ],
             [
                 'email.required' => 'Email is required',
                 'email.email' => 'Invalid email format',
-
                 'password.required' => 'Password is required',
-                'password.min' => 'Password must be at least 8 characters'
+                'password.min' => 'Password must be at least 8 characters',
             ]
         );
 
-
-        if (!Auth::attempt($validate)) {
-
+        if (! Auth::attempt($validate)) {
             return back()->withErrors(['email' => 'Invalid email format'])->onlyInput('email');
         }
 
-        return redirect()->route('login')->with(['success' => 'Connexion réussi !']);
+        if (Auth::user()->role === 'formateur') {
+            return redirect('/absences/saisie')->with(['success' => 'Connexion reussi !']);
+        }
+
+        return redirect('/import')->with(['success' => 'Connexion reussi !']);
     }
 }

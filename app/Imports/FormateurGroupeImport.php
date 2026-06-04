@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Groupe;
 use App\Models\Formateur;
 use App\Services\AcademicYearService;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -49,7 +50,17 @@ class FormateurGroupeImport implements ToModel, WithHeadingRow
             return;
         }
 
-        // Associer le formateur au groupe (sans supprimer les associations existantes)
-        $formateur->groupes()->syncWithoutDetaching([$groupe->id]);
+        // Associer le formateur au groupe pour l'annee active.
+        DB::table('formateur_groupe')->updateOrInsert(
+            [
+                'formateur_id' => $formateur->id,
+                'groupe_id' => $groupe->id,
+                'annee_scolaire_id' => $anneeId,
+            ],
+            [
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
     }
 }

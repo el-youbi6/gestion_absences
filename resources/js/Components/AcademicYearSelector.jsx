@@ -37,15 +37,12 @@ export default function AcademicYearSelector() {
     }
 
     return (
-        <div className="flex items-center space-x-2">
-            <label htmlFor="academic-year-select" className="text-sm font-medium text-gray-700">
-                Année scolaire:
-            </label>
+        <div className="text-right">
             <select
                 id="academic-year-select"
                 value={current || ''}
                 onChange={handleChange}
-                className="rounded-md border-gray-300 py-1 px-2 text-sm shadow-sm focus:border-blue-400 focus:ring-blue-400"
+                className="rounded-md w-36 border-gray-300 py-1 px-2 text-sm shadow-sm focus:border-blue-400 focus:ring-blue-400"
             >
                 {annees.map((annee) => (
                     <option key={annee.id} value={annee.id}>

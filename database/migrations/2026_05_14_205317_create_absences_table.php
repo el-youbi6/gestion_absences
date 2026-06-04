@@ -21,10 +21,6 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            // $table->foreignId('formateur_id')
-            //     ->constrained()
-            //     ->cascadeOnDelete();
-
             $table->foreignId('annee_scolaire_id')
                 ->constrained()
                 ->cascadeOnDelete();
@@ -35,10 +31,16 @@ return new class extends Migration
 
             $table->time('heure_fin');
 
-            $table->enum('statut', [
-                'present',
-                'absent'
-            ]);
+            $table->boolean('is_justified')->default(false);
+
+            $table->unique([
+                'stagiaire_id',
+                'module_id',
+                'date',
+                'heure_debut',
+                'heure_fin',
+            ], 'absences_unique_session');
+
             $table->timestamps();
         });
     }

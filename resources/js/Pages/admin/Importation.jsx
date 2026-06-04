@@ -1,6 +1,10 @@
-import React from "react";
-import { useForm, usePage } from "@inertiajs/react";
-import { UploadCloud, FileSpreadsheet } from "lucide-react";
+import React, { useEffect } from "react";
+import { Head, useForm, usePage } from "@inertiajs/react";
+import { AlertCircle, CheckCircle2, UploadCloud, FileSpreadsheet } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import MainLayout from "../../Layouts/MainLayout";
+import AcademicYearSelector from "../../Components/AcademicYearSelector";
 
 export default function ImportPage() {
 
@@ -9,6 +13,30 @@ export default function ImportPage() {
         file: null,
         type: "global",
     });
+
+    // Show toast notifications for flash messages
+    useEffect(() => {
+        if (flash.success) {
+            toast.success(flash.success, {
+                position: "top-right",
+                autoClose: 4000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+        }
+        if (flash.error) {
+            toast.error(flash.error, {
+                position: "top-right",
+                autoClose: 4000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+        }
+    }, [flash?.success, flash?.error]);
 
     const importTypes = [
         {
@@ -38,11 +66,13 @@ export default function ImportPage() {
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+            <Head title="Import" />
+            <ToastContainer />
 
-
-            <div className="w-full max-w-4xl bg-white rounded-3xl shadow-xl p-8">
+            <div className="w-full max-w-4xl p-2">
 
                 {/* Header */}
+
                 <div className="mb-8">
                     <h1 className="text-4xl font-bold text-gray-800">
                         Importation Excel
@@ -63,8 +93,8 @@ export default function ImportPage() {
                             type="button"
                             onClick={() => setData("type", type.value)}
                             className={`p-5 rounded-2xl border transition-all text-left ${data.type === type.value
-                                    ? "bg-blue-600 text-white border-blue-600 shadow-lg"
-                                    : "bg-gray-50 hover:bg-gray-100 border-gray-200"
+                                ? "bg-blue-600 text-white border-blue-600 shadow-lg"
+                                : "bg-gray-50 hover:bg-gray-100 border-gray-200"
                                 }`}
                         >
                             <h2 className="text-lg font-semibold">
@@ -73,8 +103,8 @@ export default function ImportPage() {
 
                             <p
                                 className={`text-sm mt-2 ${data.type === type.value
-                                        ? "text-blue-100"
-                                        : "text-gray-500"
+                                    ? "text-blue-100"
+                                    : "text-gray-500"
                                     }`}
                             >
                                 {type.description}
@@ -83,6 +113,26 @@ export default function ImportPage() {
                         </button>
                     ))}
                 </div>
+
+                {flash?.error && (
+                    <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+                        <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+                        <div>
+                            <p className="font-semibold">Import impossible</p>
+                            <p className="text-sm">{flash.error}</p>
+                        </div>
+                    </div>
+                )}
+
+                {flash?.success && (
+                    <div className="mb-6 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-700">
+                        <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0" />
+                        <div>
+                            <p className="font-semibold">Import termine</p>
+                            <p className="text-sm">{flash.success}</p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Form */}
                 <form onSubmit={handleSubmit}>
@@ -139,6 +189,12 @@ export default function ImportPage() {
                                 {errors.file}
                             </p>
                         )}
+
+                        {errors.type && (
+                            <p className="text-red-500 mt-4 text-sm">
+                                {errors.type}
+                            </p>
+                        )}
                     </div>
 
                     {/* Footer */}
@@ -153,21 +209,16 @@ export default function ImportPage() {
 
                         <button
                             type="submit"
-                            disabled={processing}
+                            disabled={processing || !data.file}
                             className={`px-8 py-3 rounded-xl font-semibold text-white transition ${processing
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : !data.file
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : "bg-green-600 hover:bg-green-700"
                                 }`}
                         >
                             {processing ? "Importation..." : "Importer"}
                         </button>
-                        {
-                            flash.success && (
-                                <div>
-                                    {flash.success}
-                                </div>
-                            )
-                        }
 
                     </div>
                 </form>
@@ -175,3 +226,4 @@ export default function ImportPage() {
         </div>
     );
 }
+ImportPage.layout = (page) => <MainLayout>{page}</MainLayout>;

@@ -6,6 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Absence extends Model
 {
+    protected $fillable = [
+        'stagiaire_id',
+        'module_id',
+        'annee_scolaire_id',
+        'date',
+        'heure_debut',
+        'heure_fin',
+        'is_justified',
+    ];
+
+    protected $casts = [
+        'is_justified' => 'boolean',
+    ];
+
     public function stagiaire()
     {
         return $this->belongsTo(Stagiaire::class);

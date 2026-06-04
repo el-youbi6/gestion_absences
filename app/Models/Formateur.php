@@ -15,11 +15,11 @@ class Formateur extends Model
 
     public function groupes()
     {
-        return $this->belongsToMany(Groupe::class);
+        return $this->belongsToMany(Groupe::class)->withPivot('annee_scolaire_id')->withTimestamps();
     }
 
     public function modules()
     {
-        return $this->belongsToMany(Module::class);
+        return $this->belongsToMany(Module::class)->withPivot('annee_scolaire_id')->withTimestamps();
     }
 }
