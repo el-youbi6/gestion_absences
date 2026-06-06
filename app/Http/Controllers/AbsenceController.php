@@ -4,9 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Absence;
 use App\Models\Module;
-use App\Services\AcademicYearService;
+use App\Services\YearService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class AbsenceController extends Controller
@@ -14,17 +13,11 @@ class AbsenceController extends Controller
     public function create(Request $request)
     {
         $formateur = $this->getFormateur($request);
-        $anneeScolaireId = AcademicYearService::getSessionAcademicYearId();
+        $anneeScolaireId = YearService::getSessionYearId();
 
         if (! $formateur) {
             return redirect('/import')->with('error', 'Aucun profil formateur associe a ce compte.');
         }
-
-        $formateur->load([
-            'modules.filiere',
-            'groupes.filiere',
-            'groupes.stagiaires.user',
-        ]);
 
         $filieres = $this->prepareFilieres($formateur);
         $modules = $this->prepareModules($formateur);
@@ -97,7 +90,7 @@ class AbsenceController extends Controller
             ->pluck('id')
             ->all();
 
-        $anneeScolaireId = AcademicYearService::getSessionAcademicYearId();
+        $anneeScolaireId = YearService::getSessionYearId();
         $absentStagiaireIds = [];
 
         foreach ($validated['presences'] ?? [] as $presence) {
@@ -153,31 +146,48 @@ class AbsenceController extends Controller
         $this->authorizeFormateur($request);
 
         $formateur = $this->getFormateur($request);
-        $annee = AcademicYearService::getSessionAcademicYear();
+        $annee = YearService::getSessionYear();
         $anneeScolaireId = $annee?->id;
 
         if (! $formateur) {
             return redirect('/import')->with('error', 'Aucun profil formateur associe a ce compte.');
         }
 
-        $modules = $formateur->modules()
+        $modulesQuery = $formateur->modules()
             ->with('filiere')
-            ->when($anneeScolaireId, fn ($query) => $query->where('formateur_module.annee_scolaire_id', $anneeScolaireId))
-            ->orderBy('nom')
-            ->get()
-            ->map(fn ($module) => [
+            ->orderBy('nom');
+
+        if ($anneeScolaireId) {
+            $modulesQuery->where('formateur_module.annee_scolaire_id', $anneeScolaireId);
+        }
+
+        $modules = [];
+
+        foreach ($modulesQuery->get() as $module) {
+            $modules[] = [
                 'id' => $module->id,
                 'nom' => $module->nom,
                 'filiere' => $module->filiere?->nom,
-            ]);
+            ];
+        }
 
-        $selectedModuleId = (int) ($request->query('module_id') ?: ($modules->first()['id'] ?? 0));
-        $canUseModule = $selectedModuleId
-            ? $formateur->modules()
-                ->whereKey($selectedModuleId)
-                ->when($anneeScolaireId, fn ($query) => $query->where('formateur_module.annee_scolaire_id', $anneeScolaireId))
-                ->exists()
-            : false;
+        $selectedModuleId = (int) $request->query('module_id');
+
+        if (! $selectedModuleId && count($modules) > 0) {
+            $selectedModuleId = $modules[0]['id'];
+        }
+
+        $canUseModule = false;
+
+        if ($selectedModuleId) {
+            $moduleQuery = $formateur->modules()->where('modules.id', $selectedModuleId);
+
+            if ($anneeScolaireId) {
+                $moduleQuery->where('formateur_module.annee_scolaire_id', $anneeScolaireId);
+            }
+
+            $canUseModule = $moduleQuery->exists();
+        }
 
         if (! $canUseModule) {
             $selectedModuleId = 0;
@@ -187,57 +197,30 @@ class AbsenceController extends Controller
             ? Module::with('filiere')->find($selectedModuleId)
             : null;
 
-        $baseQuery = Absence::query()
-            ->when($selectedModuleId, fn ($query) => $query->where('module_id', $selectedModuleId))
-            ->when($anneeScolaireId, fn ($query) => $query->where('annee_scolaire_id', $anneeScolaireId));
-
         $summary = [
-            'total_absences' => (clone $baseQuery)->count(),
-            'today_absences' => (clone $baseQuery)->whereDate('date', now()->toDateString())->count(),
-            'justified_absences' => (clone $baseQuery)->where('is_justified', true)->count(),
-            'unjustified_absences' => (clone $baseQuery)->where('is_justified', false)->count(),
+            'total_absences' => $this->countModuleAbsences($selectedModuleId, $anneeScolaireId),
+            'today_absences' => $this->countModuleAbsences($selectedModuleId, $anneeScolaireId, now()->toDateString()),
+            'justified_absences' => $this->countModuleAbsences($selectedModuleId, $anneeScolaireId, null, true),
+            'unjustified_absences' => $this->countModuleAbsences($selectedModuleId, $anneeScolaireId, null, false),
         ];
 
-        $stagiaires = Absence::query()
-            ->select([
-                'stagiaires.id',
-                'users.nom',
-                'users.prenom',
-                'users.cin',
-                'groupes.nom as groupe',
-                DB::raw('COUNT(absences.id) as total_absences'),
-                DB::raw('SUM(CASE WHEN absences.is_justified = 1 THEN 1 ELSE 0 END) as justified_absences'),
-                DB::raw('SUM(CASE WHEN absences.is_justified = 0 THEN 1 ELSE 0 END) as unjustified_absences'),
-                DB::raw('MAX(absences.date) as last_absence_date'),
-            ])
-            ->join('stagiaires', 'stagiaires.id', '=', 'absences.stagiaire_id')
-            ->join('users', 'users.id', '=', 'stagiaires.user_id')
-            ->leftJoin('groupes', 'groupes.id', '=', 'stagiaires.groupe_id')
-            ->where('absences.module_id', $selectedModuleId)
-            ->when($anneeScolaireId, fn ($query) => $query->where('absences.annee_scolaire_id', $anneeScolaireId))
-            ->groupBy('stagiaires.id', 'users.nom', 'users.prenom', 'users.cin', 'groupes.nom')
-            ->orderByDesc('total_absences')
-            ->get()
-            ->map(fn ($stagiaire) => [
-                'id' => $stagiaire->id,
-                'nom' => trim($stagiaire->nom . ' ' . $stagiaire->prenom),
-                'cin' => $stagiaire->cin,
-                'groupe' => $stagiaire->groupe,
-                'total_absences' => (int) $stagiaire->total_absences,
-                'justified_absences' => (int) $stagiaire->justified_absences,
-                'unjustified_absences' => (int) $stagiaire->unjustified_absences,
-                'last_absence_date' => $stagiaire->last_absence_date,
-            ]);
+        $stagiaires = $this->prepareStagiairesReport($selectedModuleId, $anneeScolaireId);
 
-        $recentAbsences = Absence::query()
+        $recentAbsencesQuery = Absence::query()
             ->with(['stagiaire.user', 'stagiaire.groupe'])
             ->where('module_id', $selectedModuleId)
-            ->when($anneeScolaireId, fn ($query) => $query->where('annee_scolaire_id', $anneeScolaireId))
             ->orderByDesc('date')
             ->orderByDesc('heure_debut')
-            ->limit(12)
-            ->get()
-            ->map(fn ($absence) => [
+            ->limit(12);
+
+        if ($anneeScolaireId) {
+            $recentAbsencesQuery->where('annee_scolaire_id', $anneeScolaireId);
+        }
+
+        $recentAbsences = [];
+
+        foreach ($recentAbsencesQuery->get() as $absence) {
+            $recentAbsences[] = [
                 'id' => $absence->id,
                 'stagiaire' => trim(($absence->stagiaire?->user?->nom ?? '') . ' ' . ($absence->stagiaire?->user?->prenom ?? '')),
                 'cin' => $absence->stagiaire?->user?->cin,
@@ -246,7 +229,8 @@ class AbsenceController extends Controller
                 'heure_debut' => substr($absence->heure_debut, 0, 5),
                 'heure_fin' => substr($absence->heure_fin, 0, 5),
                 'is_justified' => $absence->is_justified,
-            ]);
+            ];
+        }
 
         return Inertia::render('formateur/RapportModule', [
             'annee' => $annee,
@@ -277,13 +261,16 @@ class AbsenceController extends Controller
     {
         $filieres = [];
 
-        foreach ($formateur->groupes as $groupe) {
+        $groupes = $formateur->groupes()->with('filiere')->get();
+        $modules = $formateur->modules()->with('filiere')->get();
+
+        foreach ($groupes as $groupe) {
             if ($groupe->filiere) {
                 $filieres[$groupe->filiere->id] = $groupe->filiere;
             }
         }
 
-        foreach ($formateur->modules as $module) {
+        foreach ($modules as $module) {
             if ($module->filiere) {
                 $filieres[$module->filiere->id] = $module->filiere;
             }
@@ -307,7 +294,10 @@ class AbsenceController extends Controller
 
     private function prepareModules($formateur)
     {
-        $modules = $formateur->modules->sortBy('nom');
+        $modules = $formateur->modules()
+            ->orderBy('nom')
+            ->get();
+
         $result = [];
 
         foreach ($modules as $module) {
@@ -323,13 +313,19 @@ class AbsenceController extends Controller
 
     private function prepareGroupes($formateur, int $anneeScolaireId)
     {
-        $groupes = $formateur->groupes->sortBy('nom');
+        $groupes = $formateur->groupes()
+            ->with(['stagiaires.user'])
+            ->orderBy('nom')
+            ->get();
+
         $result = [];
 
         foreach ($groupes as $groupe) {
             $stagiaires = [];
 
-            foreach ($groupe->stagiaires->sortBy('user.nom') as $stagiaire) {
+            $stagiairesCollection = $groupe->stagiaires->sortBy('user.nom');
+
+            foreach ($stagiairesCollection as $stagiaire) {
                 $latestAbsence = $this->getLatestAbsence($stagiaire->id, $anneeScolaireId);
 
                 $stagiaires[] = [
@@ -363,5 +359,86 @@ class AbsenceController extends Controller
             ->orderByDesc('heure_debut')
             ->orderByDesc('id')
             ->first();
+    }
+
+    private function countModuleAbsences(int $moduleId, ?int $anneeScolaireId, ?string $date = null, ?bool $isJustified = null): int
+    {
+        if (! $moduleId) {
+            return 0;
+        }
+
+        $query = Absence::where('module_id', $moduleId);
+
+        if ($anneeScolaireId) {
+            $query->where('annee_scolaire_id', $anneeScolaireId);
+        }
+
+        if ($date) {
+            $query->whereDate('date', $date);
+        }
+
+        if ($isJustified !== null) {
+            $query->where('is_justified', $isJustified);
+        }
+
+        return $query->count();
+    }
+
+    private function prepareStagiairesReport(int $moduleId, ?int $anneeScolaireId): array
+    {
+        if (! $moduleId) {
+            return [];
+        }
+
+        $query = Absence::with(['stagiaire.user', 'stagiaire.groupe'])
+            ->where('module_id', $moduleId)
+            ->orderByDesc('date');
+
+        if ($anneeScolaireId) {
+            $query->where('annee_scolaire_id', $anneeScolaireId);
+        }
+
+        $stagiaires = [];
+
+        foreach ($query->get() as $absence) {
+            if (! $absence->stagiaire || ! $absence->stagiaire->user) {
+                continue;
+            }
+
+            $stagiaireId = $absence->stagiaire->id;
+
+            if (! isset($stagiaires[$stagiaireId])) {
+                $stagiaires[$stagiaireId] = [
+                    'id' => $stagiaireId,
+                    'nom' => trim($absence->stagiaire->user->nom . ' ' . $absence->stagiaire->user->prenom),
+                    'cin' => $absence->stagiaire->user->cin,
+                    'groupe' => $absence->stagiaire->groupe?->nom,
+                    'total_absences' => 0,
+                    'justified_absences' => 0,
+                    'unjustified_absences' => 0,
+                    'last_absence_date' => $absence->date,
+                ];
+            }
+
+            $stagiaires[$stagiaireId]['total_absences']++;
+
+            if ($absence->is_justified) {
+                $stagiaires[$stagiaireId]['justified_absences']++;
+            } else {
+                $stagiaires[$stagiaireId]['unjustified_absences']++;
+            }
+
+            if ($absence->date > $stagiaires[$stagiaireId]['last_absence_date']) {
+                $stagiaires[$stagiaireId]['last_absence_date'] = $absence->date;
+            }
+        }
+
+        $stagiaires = array_values($stagiaires);
+
+        usort($stagiaires, function ($firstStagiaire, $secondStagiaire) {
+            return $secondStagiaire['total_absences'] <=> $firstStagiaire['total_absences'];
+        });
+
+        return $stagiaires;
     }
 }

@@ -8,7 +8,8 @@ use App\Imports\GroupeImport;
 use App\Imports\StagiaireImport;
 use App\Models\Filiere;
 use App\Models\Groupe;
-use App\Services\AcademicYearService;
+use App\Services\YearService;
+use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,9 +18,11 @@ use Throwable;
 
 class ImportController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         return Inertia::render('admin/Importation');
     }
+
     public function import(Request $request)
     {
         $request->validate([
@@ -27,9 +30,9 @@ class ImportController extends Controller
             'type' => 'required|in:global,stagiaires,groupes',
         ]);
 
-        AcademicYearService::initializeSession();
+        YearService::initializeSession();
 
-        $anneeId = AcademicYearService::getSessionAcademicYearId();
+        $anneeId = YearService::getSessionYearId();
 
         if (!$anneeId) {
             return back()->with('error', 'Aucune annee scolaire active trouvee.');
@@ -45,30 +48,31 @@ class ImportController extends Controller
             return back()->with('error', $dependencyError);
         }
 
-        $imports = [
-            'global' => [
-                'handler' => new GlobalImport(),
-                'message' => 'Import global reussi',
-            ],
-            'stagiaires' => [
-                'handler' => new StagiaireImport(),
-                'message' => 'Import des stagiaires reussi',
-            ],
-            'groupes' => [
-                'handler' => new GroupeImport(),
-                'message' => 'Import des groupes reussi',
-            ],
-        ];
+        $typeImport = null;
+        $successMessage = '';
 
-        $selectedImport = $imports[$request->type];
+        if ($request->type === 'global') {
+            $typeImport = new GlobalImport();
+            $successMessage = 'Import global reussi';
+        }
+
+        if ($request->type === 'stagiaires') {
+            $typeImport = new StagiaireImport();
+            $successMessage = 'Import des stagiaires reussi';
+        }
+
+        if ($request->type === 'groupes') {
+            $typeImport = new GroupeImport();
+            $successMessage = 'Import des groupes reussi';
+        }
 
         try {
-            Excel::import($selectedImport['handler'], $request->file('file'));
-        } catch (Throwable $e) {
+            Excel::import($typeImport, $request->file('file'));
+        } catch (Exception $e) {
             return back()->with('error', 'Erreur lors de l import: ' . $e->getMessage());
         }
 
-        return back()->with('success', $selectedImport['message']);
+        return back()->with('success', $successMessage);
     }
 
     private function validateDependencies(string $type, string $filePath, int $anneeId): ?string
@@ -87,17 +91,32 @@ class ImportController extends Controller
     private function validateGroupesImport(string $filePath): ?string
     {
         $rows = $this->getRowsFromSheet($filePath, 'groupes');
-        $filiereNames = collect($rows)->pluck('nom_filiere')->filter()->unique()->values();
+        $filiereNames = [];
 
-        if ($filiereNames->isEmpty()) {
+        foreach ($rows as $row) {
+            if (! empty($row['nom_filiere']) && ! in_array($row['nom_filiere'], $filiereNames, true)) {
+                $filiereNames[] = $row['nom_filiere'];
+            }
+        }
+
+        if (count($filiereNames) === 0) {
             return 'Import groupes impossible: la colonne nom_filiere est vide ou introuvable.';
         }
 
-        $existingFilieres = Filiere::whereIn('nom', $filiereNames)->pluck('nom');
-        $missingFilieres = $filiereNames->diff($existingFilieres)->values();
+        $existingFilieres = Filiere::whereIn('nom', $filiereNames)
+            ->pluck('nom')
+            ->all();
 
-        if ($missingFilieres->isNotEmpty()) {
-            return 'Import groupes impossible: filieres introuvables: ' . $missingFilieres->implode(', ') . '.';
+        $missingFilieres = [];
+
+        foreach ($filiereNames as $filiereName) {
+            if (! in_array($filiereName, $existingFilieres, true)) {
+                $missingFilieres[] = $filiereName;
+            }
+        }
+
+        if (count($missingFilieres) > 0) {
+            return 'Import groupes impossible: filieres introuvables: ' . implode(', ', $missingFilieres) . '.';
         }
 
         return null;
@@ -106,20 +125,33 @@ class ImportController extends Controller
     private function validateStagiairesImport(string $filePath, int $anneeId): ?string
     {
         $rows = $this->getRowsFromSheet($filePath, 'stagiaires');
-        $groupNames = collect($rows)->pluck('nom_group')->filter()->unique()->values();
+        $groupNames = [];
 
-        if ($groupNames->isEmpty()) {
+        foreach ($rows as $row) {
+            if (! empty($row['nom_group']) && ! in_array($row['nom_group'], $groupNames, true)) {
+                $groupNames[] = $row['nom_group'];
+            }
+        }
+
+        if (count($groupNames) === 0) {
             return 'Import stagiaires impossible: la colonne nom_group est vide ou introuvable.';
         }
 
         $existingGroups = Groupe::where('annee_scolaire_id', $anneeId)
             ->whereIn('nom', $groupNames)
-            ->pluck('nom');
+            ->pluck('nom')
+            ->all();
 
-        $missingGroups = $groupNames->diff($existingGroups)->values();
+        $missingGroups = [];
 
-        if ($missingGroups->isNotEmpty()) {
-            return 'Import stagiaires impossible: groupes introuvables dans cette annee: ' . $missingGroups->implode(', ') . '.';
+        foreach ($groupNames as $groupName) {
+            if (! in_array($groupName, $existingGroups, true)) {
+                $missingGroups[] = $groupName;
+            }
+        }
+
+        if (count($missingGroups) > 0) {
+            return 'Import stagiaires impossible: groupes introuvables dans cette annee: ' . implode(', ', $missingGroups) . '.';
         }
 
         return null;
@@ -137,23 +169,36 @@ class ImportController extends Controller
             $headings[$column] = $this->normalizeHeading((string) $heading);
         }
 
-        return collect($data)
-            ->map(function (array $row) use ($headings) {
-                $normalizedRow = [];
+        $rows = [];
 
-                foreach ($headings as $column => $heading) {
-                    if ($heading !== '') {
-                        $normalizedRow[$heading] = is_string($row[$column] ?? null)
-                            ? trim($row[$column])
-                            : $row[$column] ?? null;
-                    }
+        foreach ($data as $row) {
+            $normalizedRow = [];
+            $hasValue = false;
+
+            foreach ($headings as $column => $heading) {
+                if ($heading === '') {
+                    continue;
                 }
 
-                return $normalizedRow;
-            })
-            ->filter(fn (array $row) => collect($row)->filter()->isNotEmpty())
-            ->values()
-            ->all();
+                $value = $row[$column] ?? null;
+
+                if (is_string($value)) {
+                    $value = trim($value);
+                }
+
+                if ($value !== null && $value !== '') {
+                    $hasValue = true;
+                }
+
+                $normalizedRow[$heading] = $value;
+            }
+
+            if ($hasValue) {
+                $rows[] = $normalizedRow;
+            }
+        }
+
+        return $rows;
     }
 
     private function normalizeHeading(string $heading): string

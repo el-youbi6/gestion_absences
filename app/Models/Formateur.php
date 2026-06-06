@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['user_id'])]
 class Formateur extends Model
 {
+    protected $fillable = ['user_id'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -15,11 +15,11 @@ class Formateur extends Model
 
     public function groupes()
     {
-        return $this->belongsToMany(Groupe::class)->withPivot('annee_scolaire_id')->withTimestamps();
+        return $this->belongsToMany(Groupe::class);
     }
 
     public function modules()
     {
-        return $this->belongsToMany(Module::class)->withPivot('annee_scolaire_id')->withTimestamps();
+        return $this->belongsToMany(Module::class);
     }
 }

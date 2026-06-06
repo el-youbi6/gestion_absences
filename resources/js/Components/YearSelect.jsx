@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { router } from '@inertiajs/react';
 
-export default function AcademicYearSelector() {
+export default function YearSelector() {
     const [annees, setAnnees] = useState([]);
     const [current, setCurrent] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // Récupérer les années scolaires
-        fetch(route('academic-year.all'))
+        fetch(route('year.all'))
             .then((response) => response.json())
             .then((data) => {
                 setAnnees(data.annees);
@@ -23,7 +23,7 @@ export default function AcademicYearSelector() {
 
     const handleChange = (e) => {
         const anneeId = parseInt(e.target.value);
-        router.post(route('academic-year.set-active'), {
+        router.post(route('year.set-active'), {
             annee_scolaire_id: anneeId,
         });
     };
@@ -39,7 +39,6 @@ export default function AcademicYearSelector() {
     return (
         <div className="text-right">
             <select
-                id="academic-year-select"
                 value={current || ''}
                 onChange={handleChange}
                 className="rounded-md w-36 border-gray-300 py-1 px-2 text-sm shadow-sm focus:border-blue-400 focus:ring-blue-400"

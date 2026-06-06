@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { AlertCircle, BarChart3, CalendarDays, CheckCircle2, FileText } from 'lucide-react';
 import MainLayout from '../../Layouts/MainLayout';
-import AcademicYearSelector from '../../Components/AcademicYearSelector';
+import YearSelect from '../../Components/YearSelect';
 
 export default function RapportModule({ annee, modules, selectedModuleId, selectedModule, summary, stagiaires, recentAbsences }) {
     const changeModule = (moduleId) => {
@@ -24,7 +24,7 @@ export default function RapportModule({ annee, modules, selectedModuleId, select
                         Consultation directe pour l annee scolaire {annee?.libelle || 'active'}.
                     </p>
                 </div>
-                <AcademicYearSelector />
+                <YearSelect />
             </div>
 
             <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">

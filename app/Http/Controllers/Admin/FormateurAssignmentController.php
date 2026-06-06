@@ -7,7 +7,7 @@ use App\Imports\FormateurAssignmentImport;
 use App\Models\Formateur;
 use App\Models\Groupe;
 use App\Models\Module;
-use App\Services\AcademicYearService;
+use App\Services\YearService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,37 +22,40 @@ class FormateurAssignmentController extends Controller
     {
         $this->authorizeAdmin($request);
 
-        $annee = AcademicYearService::getSessionAcademicYear();
+        $annee = YearService::getSessionYear();
         $anneeId = $annee?->id;
 
-        $formateurs = Formateur::query()
+        $formateursList = Formateur::query()
             ->with('user')
             ->join('users', 'users.id', '=', 'formateurs.user_id')
             ->select('formateurs.*')
             ->where('users.role', 'formateur')
             ->orderBy('users.nom')
             ->orderBy('users.prenom')
-            ->get()
-            ->map(function (Formateur $formateur) use ($anneeId) {
-                $groupes = $formateur->groupes()
-                    ->where('groupes.annee_scolaire_id', $anneeId)
-                    ->where('formateur_groupe.annee_scolaire_id', $anneeId)
-                    ->orderBy('groupes.nom')
-                    ->get(['groupes.id', 'groupes.nom']);
+            ->get();
 
-                $modules = $formateur->modules()
-                    ->where('formateur_module.annee_scolaire_id', $anneeId)
-                    ->orderBy('modules.nom')
-                    ->get(['modules.id', 'modules.nom']);
+        $formateurs = [];
 
-                return [
-                    'id' => $formateur->id,
-                    'nom' => trim($formateur->user->nom . ' ' . $formateur->user->prenom),
-                    'cin' => $formateur->user->cin,
-                    'groupes' => $groupes,
-                    'modules' => $modules,
-                ];
-            });
+        foreach ($formateursList as $formateur) {
+            $groupes = $formateur->groupes()
+                ->where('groupes.annee_scolaire_id', $anneeId)
+                ->where('formateur_groupe.annee_scolaire_id', $anneeId)
+                ->orderBy('groupes.nom')
+                ->get(['groupes.id', 'groupes.nom']);
+
+            $modules = $formateur->modules()
+                ->where('formateur_module.annee_scolaire_id', $anneeId)
+                ->orderBy('modules.nom')
+                ->get(['modules.id', 'modules.nom']);
+
+            $formateurs[] = [
+                'id' => $formateur->id,
+                'nom' => trim($formateur->user->nom . ' ' . $formateur->user->prenom),
+                'cin' => $formateur->user->cin,
+                'groupes' => $groupes,
+                'modules' => $modules,
+            ];
+        }
 
         return Inertia::render('admin/FormateurAssignments', [
             'annee' => $annee,
@@ -79,7 +82,7 @@ class FormateurAssignmentController extends Controller
             'module_ids.*' => ['exists:modules,id'],
         ]);
 
-        $anneeId = AcademicYearService::getSessionAcademicYearId();
+        $anneeId = YearService::getSessionYearId();
 
         $validGroupIds = Groupe::where('annee_scolaire_id', $anneeId)
             ->whereIn('id', array_unique($validated['groupe_ids'] ?? []))

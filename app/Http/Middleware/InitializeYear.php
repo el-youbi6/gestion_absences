@@ -2,19 +2,19 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\AcademicYearService;
+use App\Services\YearService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class InitializeAcademicYear
+class InitializeYear
 {
     /**
      * Initialise l'année scolaire au démarrage de chaque requête
      */
     public function handle(Request $request, Closure $next): Response
     {
-        AcademicYearService::initializeSession();
+        YearService::initializeSession();
 
         return $next($request);
     }

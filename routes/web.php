@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\YearController;
 use App\Http\Controllers\AbsenceController;
 use App\Http\Controllers\Admin\AbsenceStatsController;
 use App\Http\Controllers\Admin\FormateurAssignmentController;
@@ -17,11 +17,11 @@ use Inertia\Inertia;
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
-    Route::post('/academic-year/set-active', [AcademicYearController::class, 'setActive'])
-        ->name('academic-year.set-active');
+    Route::post('/year/set-active', [YearController::class, 'setActive'])
+        ->name('year.set-active');
 
-    Route::get('/academic-year/all', [AcademicYearController::class, 'getAll'])
-        ->name('academic-year.all');
+    Route::get('/year/all', [YearController::class, 'getAll'])
+        ->name('year.all');
 
     Route::middleware('adminOrSurveillant')->group(function () {
         Route::get('/import', [ImportController::class, 'index']);

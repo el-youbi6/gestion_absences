@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
-#[Fillable(['nom', 'filiere_id'])]
+
 class Module extends Model
 {
+    protected $fillable = ['nom', 'filiere_id'];
+
     public function filiere()
     {
         return $this->belongsTo(Filiere::class);

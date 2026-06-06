@@ -4,7 +4,7 @@ import { AlertCircle, CheckCircle2, UploadCloud, FileSpreadsheet } from "lucide-
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import MainLayout from "../../Layouts/MainLayout";
-import AcademicYearSelector from "../../Components/AcademicYearSelector";
+import YearSelect from "../../Components/YearSelect";
 
 export default function ImportPage() {
 

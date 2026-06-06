@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { AlertCircle, BarChart3, CalendarDays, CheckCircle2, TrendingUp } from 'lucide-react';
 import MainLayout from '../../Layouts/MainLayout';
-import AcademicYearSelector from '../../Components/AcademicYearSelector';
+import YearSelect from '../../Components/YearSelect';
 
 export default function AbsenceStats({ annee, summary, statsByFiliere, topStagiaires }) {
     const maxFiliereAbsences = Math.max(...statsByFiliere.map((item) => item.total_absences), 1);
@@ -18,7 +18,7 @@ export default function AbsenceStats({ annee, summary, statsByFiliere, topStagia
                         Vue d ensemble pour l annee scolaire {annee?.libelle || 'active'}.
                     </p>
                 </div>
-                <AcademicYearSelector />
+                <YearSelect />
             </div>
 
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

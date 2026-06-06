@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\AcademicYearService;
+use App\Services\YearService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
-class AcademicYearController extends Controller
+class YearController extends Controller
 {
     /**
      * Change l'année scolaire active
@@ -17,7 +17,7 @@ class AcademicYearController extends Controller
             'annee_scolaire_id' => 'required|exists:annee_scolaires,id'
         ]);
 
-        AcademicYearService::setActiveAcademicYear($request->annee_scolaire_id);
+        YearService::setActiveYear($request->annee_scolaire_id);
 
         return back()->with('success', 'Année scolaire modifiée avec succès');
     }
@@ -28,8 +28,8 @@ class AcademicYearController extends Controller
      */
     public function getAll()
     {
-        $annees = AcademicYearService::getAllAcademicYears();
-        $current = AcademicYearService::getSessionAcademicYearId();
+        $annees = YearService::getAllYears();
+        $current = YearService::getSessionYearId();
 
         return response()->json([
             'annees' => $annees,

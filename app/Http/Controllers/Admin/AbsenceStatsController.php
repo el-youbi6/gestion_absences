@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Absence;
 use App\Models\AnneeScolaire;
-use App\Services\AcademicYearService;
+use App\Services\YearService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -16,7 +16,7 @@ class AbsenceStatsController extends Controller
     {
         $this->authorizeAdmin($request);
 
-        $annee = AcademicYearService::getSessionAcademicYear();
+        $annee = YearService::getSessionYear();
         $anneeScolaireId = $annee?->id;
 
         $baseQuery = Absence::query()

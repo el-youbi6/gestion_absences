@@ -5,7 +5,7 @@ namespace App\Imports;
 use App\Models\User;
 use App\Models\Module;
 use App\Models\Formateur;
-use App\Services\AcademicYearService;
+use App\Services\YearService;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -42,7 +42,7 @@ class FormateurModuleImport implements ToModel, WithHeadingRow
             return;
         }
 
-        $anneeId = AcademicYearService::getSessionAcademicYearId();
+        $anneeId = YearService::getSessionYearId();
         if (!$anneeId) {
             return;
         }

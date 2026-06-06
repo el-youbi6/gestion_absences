@@ -7,7 +7,7 @@ use App\Models\Formateur;
 use App\Models\Groupe;
 use App\Models\Stagiaire;
 use App\Models\User;
-use App\Services\AcademicYearService;
+use App\Services\YearService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -44,7 +44,7 @@ class UserManagementController extends Controller
                 'groupe' => $user->stagiaire?->groupe?->nom,
             ]);
 
-        $anneeId = AcademicYearService::getSessionAcademicYearId();
+        $anneeId = YearService::getSessionYearId();
 
         return Inertia::render('admin/Users', [
             'users' => $users,
@@ -122,7 +122,7 @@ class UserManagementController extends Controller
 
     private function validatedData(Request $request, ?User $user = null): array
     {
-        $anneeId = AcademicYearService::getSessionAcademicYearId();
+        $anneeId = YearService::getSessionYearId();
 
         return $request->validate([
             'nom' => ['required', 'string', 'max:255'],

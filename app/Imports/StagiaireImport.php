@@ -5,7 +5,7 @@ namespace App\Imports;
 use App\Models\User;
 use App\Models\Groupe;
 use App\Models\Stagiaire;
-use App\Services\AcademicYearService;
+use App\Services\YearService;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -25,7 +25,7 @@ class StagiaireImport implements ToModel, WithHeadingRow
         }
 
         // Récupérer le groupe lié à l'année scolaire actuelle
-        $anneeId = AcademicYearService::getSessionAcademicYearId();
+        $anneeId = YearService::getSessionYearId();
         if (!$anneeId) {
             return null;
         }

@@ -4,7 +4,7 @@ import { CalendarDays, Save } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import MainLayout from '../../Layouts/MainLayout';
-import AcademicYearSelector from '../../Components/AcademicYearSelector';
+import YearSelect from '../../Components/YearSelect';
 import AbsenceSelectField from '../../Components/AbsenceSelectField';
 import AbsenceTimeSelect from '../../Components/AbsenceTimeSelect';
 import StagiairePresenceTable from '../../Components/StagiairePresenceTable';
@@ -113,7 +113,7 @@ export default function SaisieAbsences({ filieres, modules, groupes, timeSlots, 
                         Selectionnez la seance puis cochez uniquement les stagiaires absents.
                     </p>
                 </div>
-                <AcademicYearSelector />
+                <YearSelect />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">

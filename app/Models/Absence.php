@@ -29,11 +29,6 @@ class Absence extends Model
     {
         return $this->belongsTo(Module::class);
     }
-
-    public function justification()
-    {
-        return $this->hasOne(Justification::class);
-    }
     
     public function anneeScolaire()
     {

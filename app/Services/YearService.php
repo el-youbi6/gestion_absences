@@ -5,13 +5,13 @@ namespace App\Services;
 use App\Models\AnneeScolaire;
 use Illuminate\Support\Facades\Session;
 
-class AcademicYearService
+class YearService
 {
     /**
      * Calcule l'année scolaire actuelle
      * Logique: si mois >= 9 => year/(year+1), sinon => (year-1)/year
      */
-    public static function getCurrentAcademicYear(): string
+    public static function getCurrentYear(): string
     {
         $year = now()->year;
         $month = now()->month;
@@ -26,9 +26,9 @@ class AcademicYearService
     /**
      * Récupère ou crée l'année scolaire actuelle
      */
-    public static function getOrCreateCurrentAcademicYear(): AnneeScolaire
+    public static function getOrCreateCurrentYear()
     {
-        $libelle = self::getCurrentAcademicYear();
+        $libelle = self::getCurrentYear();
 
         return AnneeScolaire::firstOrCreate(
             ['libelle' => $libelle],
@@ -42,7 +42,7 @@ class AcademicYearService
     public static function initializeSession(): void
     {
         if (!Session::has('annee_scolaire_id')) {
-            $annee = self::getOrCreateCurrentAcademicYear();
+            $annee = self::getOrCreateCurrentYear();
             Session::put('annee_scolaire_id', $annee->id);
         }
     }
@@ -50,7 +50,7 @@ class AcademicYearService
     /**
      * Récupère l'année scolaire actuelle depuis la session
      */
-    public static function getSessionAcademicYear(): ?AnneeScolaire
+    public static function getSessionYear(): ?AnneeScolaire
     {
         $id = Session::get('annee_scolaire_id');
         
@@ -65,16 +65,16 @@ class AcademicYearService
     /**
      * Récupère l'ID de l'année scolaire de session
      */
-    public static function getSessionAcademicYearId(): ?int
+    public static function getSessionYearId(): ?int
     {
-        $annee = self::getSessionAcademicYear();
+        $annee = self::getSessionYear();
         return $annee?->id;
     }
 
     /**
      * Change l'année scolaire active
      */
-    public static function setActiveAcademicYear(int $anneeId): void
+    public static function setActiveYear(int $anneeId): void
     {
         $annee = AnneeScolaire::find($anneeId);
         
@@ -86,7 +86,7 @@ class AcademicYearService
     /**
      * Récupère toutes les années scolaires disponibles
      */
-    public static function getAllAcademicYears()
+    public static function getAllYears()
     {
         return AnneeScolaire::orderByDesc('libelle')->get();
     }

@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['nom', 'filiere_id', 'annee_scolaire_id'])]
 class Groupe extends Model
 {
+    protected $fillable = ['nom', 'filiere_id', 'annee_scolaire_id'];
+
     public function stagiaires()
     {
         return $this->hasMany(Stagiaire::class);

@@ -4,7 +4,7 @@ namespace App\Imports;
 
 use App\Models\Groupe;
 use App\Models\Filiere;
-use App\Services\AcademicYearService;
+use App\Services\YearService;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -29,7 +29,7 @@ class GroupeImport implements ToModel, WithHeadingRow
         }
 
         // Récupérer l'année scolaire depuis la session
-        $anneeId = AcademicYearService::getSessionAcademicYearId();
+        $anneeId = YearService::getSessionYearId();
         if (!$anneeId) {
             return null;
         }
