@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\YearController;
 use App\Http\Controllers\AbsenceController;
+use App\Http\Controllers\Admin\AbsenceJustificationController;
 use App\Http\Controllers\Admin\AbsenceStatsController;
 use App\Http\Controllers\Admin\FormateurAssignmentController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\StagiaireAbsenceController;
 use App\Http\Controllers\Auth\loginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Admin\ImportController;
@@ -29,6 +31,11 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/admin/statistiques-absences', [AbsenceStatsController::class, 'index'])
             ->name('admin.absence-stats.index');
+
+        Route::get('/admin/justification-absences', [AbsenceJustificationController::class, 'index'])
+            ->name('admin.absence-justification.index');
+        Route::post('/admin/justification-absences', [AbsenceJustificationController::class, 'update'])
+            ->name('admin.absence-justification.update');
 
         Route::get('/admin/affectations-formateurs', [FormateurAssignmentController::class, 'index'])
             ->name('admin.formateur-assignments.index');
@@ -59,6 +66,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/admin/users/{user}', [UserManagementController::class, 'destroy'])
             ->name('admin.users.destroy');
     });
+
+    Route::get('/stagiaire/suivi-absences', [StagiaireAbsenceController::class, 'index'])
+        ->name('stagiaire.suivi-absences');
 });
 
 Route::middleware('guest')->group(function () {

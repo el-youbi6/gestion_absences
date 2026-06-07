@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use Throwable;
+// use Throwable;
 
 class ImportController extends Controller
 {
@@ -48,20 +48,13 @@ class ImportController extends Controller
             return back()->with('error', $dependencyError);
         }
 
-        $typeImport = null;
-        $successMessage = '';
-
         if ($request->type === 'global') {
             $typeImport = new GlobalImport();
             $successMessage = 'Import global reussi';
-        }
-
-        if ($request->type === 'stagiaires') {
+        } elseif ($request->type === 'stagiaires') {
             $typeImport = new StagiaireImport();
             $successMessage = 'Import des stagiaires reussi';
-        }
-
-        if ($request->type === 'groupes') {
+        } else {
             $typeImport = new GroupeImport();
             $successMessage = 'Import des groupes reussi';
         }
@@ -75,7 +68,7 @@ class ImportController extends Controller
         return back()->with('success', $successMessage);
     }
 
-    private function validateDependencies(string $type, string $filePath, int $anneeId): ?string
+    public function validateDependencies($type, $filePath, $anneeId)
     {
         if ($type === 'groupes') {
             return $this->validateGroupesImport($filePath);
@@ -88,7 +81,7 @@ class ImportController extends Controller
         return null;
     }
 
-    private function validateGroupesImport(string $filePath): ?string
+    public function validateGroupesImport($filePath)
     {
         $rows = $this->getRowsFromSheet($filePath, 'groupes');
         $filiereNames = [];
@@ -122,7 +115,7 @@ class ImportController extends Controller
         return null;
     }
 
-    private function validateStagiairesImport(string $filePath, int $anneeId): ?string
+    public function validateStagiairesImport($filePath, $anneeId)
     {
         $rows = $this->getRowsFromSheet($filePath, 'stagiaires');
         $groupNames = [];
@@ -157,7 +150,7 @@ class ImportController extends Controller
         return null;
     }
 
-    private function getRowsFromSheet(string $filePath, string $sheetName): array
+    public function getRowsFromSheet($filePath, $sheetName)
     {
         $spreadsheet = IOFactory::load($filePath);
         $sheet = $spreadsheet->getSheetByName($sheetName) ?: $spreadsheet->getActiveSheet();
@@ -201,7 +194,7 @@ class ImportController extends Controller
         return $rows;
     }
 
-    private function normalizeHeading(string $heading): string
+    public function normalizeHeading($heading)
     {
         $heading = trim(strtolower($heading));
         $heading = preg_replace('/^\xEF\xBB\xBF/', '', $heading);

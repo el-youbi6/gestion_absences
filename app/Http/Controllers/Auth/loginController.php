@@ -31,6 +31,10 @@ class loginController extends Controller
             return redirect('/absences/saisie')->with(['success' => 'Connexion reussi !']);
         }
 
+        if (Auth::user()->role === 'stagiaire') {
+            return redirect('/stagiaire/suivi-absences')->with(['success' => 'Connexion reussi !']);
+        }
+
         return redirect('/import')->with(['success' => 'Connexion reussi !']);
     }
 }

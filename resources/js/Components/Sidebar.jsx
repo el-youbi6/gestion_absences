@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart3, FileText, Import, LogOut, UserRoundCog, UsersRound, BookUser } from 'lucide-react';
+import { BarChart3, CheckSquare, FileText, Import, LogOut, UserRoundCog, UsersRound, BookUser } from 'lucide-react';
 import OFPPT from "../assets/OFPPT2.webp";
 
 const sidebarItems = [
@@ -25,6 +25,12 @@ const sidebarItems = [
         name: 'Statistiques',
         href: '/admin/statistiques-absences',
         icon: <BarChart3 className='w-4' />,
+        roles: ['admin', 'surveillant'],
+    },
+    {
+        name: 'Justifications',
+        href: '/admin/justification-absences',
+        icon: <CheckSquare className='w-4' />,
         roles: ['admin', 'surveillant'],
     },
     {
