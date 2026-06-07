@@ -10,6 +10,7 @@ use App\Http\Controllers\StagiaireAbsenceController;
 use App\Http\Controllers\Auth\loginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Admin\ImportController;
+use App\Http\Controllers\RapportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -52,7 +53,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/absences/saisie', [AbsenceController::class, 'store'])
             ->name('absences.saisie.store');
 
-        Route::get('/absences/rapport-modules', [AbsenceController::class, 'moduleReport'])
+        Route::get('/absences/rapport-modules', [RapportController::class, 'index'])
             ->name('absences.rapport-modules');
     });
 

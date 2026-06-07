@@ -16,7 +16,6 @@ class ModuleImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        // Valider les données requises
         if (empty($row['nom']) || empty($row['nom_filiere'])) {
             return null;
         }

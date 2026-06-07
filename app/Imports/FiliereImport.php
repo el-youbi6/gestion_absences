@@ -15,7 +15,6 @@ class FiliereImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        // Valider qu'il y a bien un nom
         if (empty($row['nom'])) {
             return null;
         }

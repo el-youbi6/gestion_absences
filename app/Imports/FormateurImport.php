@@ -17,12 +17,10 @@ class FormateurImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        // Valider les données requises
         if (empty($row['email']) || empty($row['nom']) || empty($row['prenom'])) {
             return null;
         }
 
-        // Créer ou récupérer l'utilisateur avec le rôle formateur
         $user = User::firstOrCreate(
             ['email' => $row['email']],
             [
@@ -34,7 +32,6 @@ class FormateurImport implements ToModel, WithHeadingRow
             ]
         );
 
-        // Créer ou mettre à jour le formateur
         return Formateur::updateOrCreate(
             ['user_id' => $user->id],
             ['user_id' => $user->id]

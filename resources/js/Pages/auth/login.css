@@ -3,7 +3,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url('../../assets/UI.webp');
+    background-image: url('../../assets/UI2.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -15,9 +15,9 @@
     max-width: calc(100% - 2rem);
     margin: 0 1rem;
     padding: 2rem 1.5rem;
-    background-color: transparent;
-    background-color: rgba(255, 255, 255, 0.05);
-    color: black;
+    /* background-color: transparent; */
+    /* background-color: rgba(255, 255, 255, 0.05); */
+    color: white;
     text-align: left;
     font-size: 0.875rem;
     border-radius: 1rem;
@@ -27,7 +27,7 @@
 .login-form h2 {
     margin-bottom: 2.25rem;
     text-align: center;
-    color: #1f2937;
+    color: white;
     font-size: 2rem;
     font-weight: 700;
 }

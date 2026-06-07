@@ -26,7 +26,6 @@ return new class extends Migration
             //     ->constrained()
             //     ->cascadeOnDelete();
 
-            // $table->string('matricule')->unique();
             $table->timestamps();
         });
     }

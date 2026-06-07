@@ -19,18 +19,15 @@ class FormateurGroupeImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        // Valider les données requises
         if (empty($row['formateur_cin']) || empty($row['groupe'])) {
             return;
         }
 
-        // Récupérer le formateur par CIN
         $user = User::where('cin', $row['formateur_cin'])->first();
         if (!$user) {
             return;
         }
 
-        // Récupérer le groupe lié à l'année scolaire actuelle
         $anneeId = YearService::getSessionYearId();
         if (!$anneeId) {
             return;
@@ -44,13 +41,11 @@ class FormateurGroupeImport implements ToModel, WithHeadingRow
             return;
         }
 
-        // Récupérer le formateur
         $formateur = Formateur::where('user_id', $user->id)->first();
         if (!$formateur) {
             return;
         }
 
-        // Associer le formateur au groupe pour l'annee active.
         DB::table('formateur_groupe')->updateOrInsert(
             [
                 'formateur_id' => $formateur->id,

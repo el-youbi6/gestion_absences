@@ -17,18 +17,15 @@ class GroupeImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        // Valider les données requises
         if (empty($row['nom']) || empty($row['nom_filiere'])) {
             return null;
         }
 
-        // Récupérer la filière
         $filiere = Filiere::where('nom', $row['nom_filiere'])->first();
         if (!$filiere) {
             return null;
         }
 
-        // Récupérer l'année scolaire depuis la session
         $anneeId = YearService::getSessionYearId();
         if (!$anneeId) {
             return null;

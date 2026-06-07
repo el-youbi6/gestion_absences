@@ -19,24 +19,20 @@ class FormateurModuleImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        // Valider les données requises
         if (empty($row['formateur_cin']) || empty($row['module'])) {
             return;
         }
 
-        // Récupérer le formateur par CIN
         $user = User::where('cin', $row['formateur_cin'])->first();
         if (!$user) {
             return;
         }
 
-        // Récupérer le module
         $module = Module::where('nom', $row['module'])->first();
         if (!$module) {
             return;
         }
 
-        // Récupérer le formateur
         $formateur = Formateur::where('user_id', $user->id)->first();
         if (!$formateur) {
             return;
@@ -47,7 +43,6 @@ class FormateurModuleImport implements ToModel, WithHeadingRow
             return;
         }
 
-        // Associer le formateur au module pour l'annee active.
         DB::table('formateur_module')->updateOrInsert(
             [
                 'formateur_id' => $formateur->id,

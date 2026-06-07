@@ -19,12 +19,10 @@ class StagiaireImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        // Valider les données requises
         if (empty($row['nom_group']) || empty($row['email']) || empty($row['nom']) || empty($row['prenom'])) {
             return null;
         }
 
-        // Récupérer le groupe lié à l'année scolaire actuelle
         $anneeId = YearService::getSessionYearId();
         if (!$anneeId) {
             return null;
@@ -38,7 +36,6 @@ class StagiaireImport implements ToModel, WithHeadingRow
             return null;
         }
 
-        // Créer ou récupérer l'utilisateur avec le rôle correct
         $user = User::firstOrCreate(
             ['email' => $row['email']],
             [
@@ -50,7 +47,6 @@ class StagiaireImport implements ToModel, WithHeadingRow
             ]
         );
 
-        // Créer ou mettre à jour le stagiaire
         return Stagiaire::updateOrCreate(
             ['user_id' => $user->id],
             [
