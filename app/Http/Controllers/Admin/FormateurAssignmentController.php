@@ -143,7 +143,7 @@ class FormateurAssignmentController extends Controller
         return back()->with('success', 'Import des affectations termine.');
     }
 
-    private function authorizeAdmin(Request $request): void
+    public function authorizeAdmin(Request $request): void
     {
         abort_unless(in_array($request->user()?->role, ['admin', 'surveillant'], true), 403);
     }

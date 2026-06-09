@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Absence;
-use App\Models\Module;
 use App\Services\YearService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

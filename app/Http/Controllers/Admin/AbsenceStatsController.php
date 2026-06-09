@@ -14,7 +14,6 @@ class AbsenceStatsController extends Controller
 {
     public function index(Request $request)
     {
-        $this->authorizeAdmin($request);
 
         $annee = YearService::getSessionYear();
         $anneeScolaireId = $annee?->id;
@@ -93,8 +92,5 @@ class AbsenceStatsController extends Controller
         ]);
     }
 
-    private function authorizeAdmin(Request $request): void
-    {
-        abort_unless(in_array($request->user()?->role, ['admin', 'surveillant'], true), 403);
-    }
+    
 }
