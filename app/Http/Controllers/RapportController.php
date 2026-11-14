@@ -28,7 +28,7 @@ class RapportController extends Controller
                 'nom' => $module->nom,
                 'filiere' => $module->filiere->nom,
             ];
-        }
+        } 
 
         $selectModuleId = $request->module_id;
 

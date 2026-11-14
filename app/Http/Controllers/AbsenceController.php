@@ -15,7 +15,7 @@ class AbsenceController extends Controller
         $anneeScolaireId = YearService::getSessionYearId();
 
         if (! $formateur) {
-            return redirect('/import')->with('error', 'Aucun profil formateur associe a ce compte.');
+            return back()->with('error', 'Aucun profil formateur associe a ce compte.');
         }
 
         $filieres = $this->prepareFilieres($formateur);
@@ -150,7 +150,7 @@ class AbsenceController extends Controller
         return $result;
     }
 
-    public function prepareGroupes($formateur, int $anneeScolaireId)
+    public function prepareGroupes($formateur, $anneeScolaireId)
     {
         $groupes = $formateur->groupes()
             ->with(['stagiaires.user'])
@@ -190,7 +190,7 @@ class AbsenceController extends Controller
         return $result;
     }
 
-    public function getLatestAbsence(int $stagiaireId, int $anneeScolaireId)
+    public function getLatestAbsence($stagiaireId, $anneeScolaireId)
     {
         return Absence::where('stagiaire_id', $stagiaireId)
             ->where('annee_scolaire_id', $anneeScolaireId)

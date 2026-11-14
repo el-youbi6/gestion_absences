@@ -13,22 +13,25 @@ class GroupeImport implements ToModel, WithHeadingRow
     /**
      * @param array $row
      *
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @return \Illuminate\Database\Eloquent\Model
+     *
+     * @throws \Exception
      */
     public function model(array $row)
+    
     {
         if (empty($row['nom']) || empty($row['nom_filiere'])) {
-            return null;
+            throw new \Exception("Le nom du groupe et le nom de la filière sont requis");
         }
 
         $filiere = Filiere::where('nom', $row['nom_filiere'])->first();
         if (!$filiere) {
-            return null;
+            throw new \Exception("La filière {$row['nom_filiere']} n'existe pas");
         }
 
         $anneeId = YearService::getSessionYearId();
         if (!$anneeId) {
-            return null;
+            throw new \Exception("Impossible de récupérer l'année scolaire en session");
         }
 
         return Groupe::updateOrCreate(

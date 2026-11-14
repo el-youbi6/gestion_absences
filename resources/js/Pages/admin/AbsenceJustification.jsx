@@ -1,8 +1,9 @@
 import { Head, router, useForm, usePage } from "@inertiajs/react";
-import { CheckCircle2, Filter, Search } from "lucide-react";
+import { CheckCircle2, FileText, Filter, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import logoOFPPT from "../../assets/ofppt.png";
 import MainLayout from "../../Layouts/MainLayout";
 
 export default function AbsenceJustification({ filters, stagiaire, absences }) {
@@ -62,6 +63,248 @@ export default function AbsenceJustification({ filters, stagiaire, absences }) {
         justifyForm.post("/admin/justification-absences", {
             preserveScroll: true,
         });
+    };
+
+    const escapeHtml = (value) =>
+        String(value ?? "-")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    const generateBillet = () => {
+        if (!stagiaire) return;
+
+        const now = new Date();
+        const dateGeneration = now.toLocaleDateString("fr-FR", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+        const heureGeneration = now.toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+        const nomComplet = `${stagiaire.nom || ""} ${stagiaire.prenom || ""}`.trim() || "-";
+
+        const previewWindow = window.open("", "_blank", "width=900,height=1000");
+
+        if (!previewWindow) {
+            toast.error("Impossible d'ouvrir l'aperçu. Veuillez autoriser les fenêtres pop-up.");
+            return;
+        }
+
+        previewWindow.document.open();
+        previewWindow.document.write(`
+            <!doctype html>
+            <html lang="fr">
+                <head>
+                    <meta charset="utf-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1" />
+                    <title>Billet d'absence</title>
+                    <style>
+                        @page {
+                            size: A4;
+                            margin: 0;
+                        }
+
+                        * {
+                            box-sizing: border-box;
+                        }
+
+                        body {
+                            margin: 0;
+                            background: #e2e8f0;
+                            color: #0f172a;
+                            font-family: Arial, Helvetica, sans-serif;
+                        }
+
+                        .toolbar {
+                            align-items: center;
+                            background: #0f172a;
+                            display: flex;
+                            justify-content: center;
+                            padding: 14px;
+                            position: sticky;
+                            top: 0;
+                            z-index: 2;
+                        }
+
+                        .print-button {
+                            background: #2563eb;
+                            border: 0;
+                            border-radius: 8px;
+                            color: #ffffff;
+                            cursor: pointer;
+                            font-size: 14px;
+                            font-weight: 700;
+                            padding: 10px 22px;
+                        }
+
+                        .page {
+                            align-items: center;
+                            background: #ffffff;
+                            display: flex;
+                            justify-content: center;
+                            margin: 24px auto;
+                            min-height: 297mm;
+                            padding: 18mm;
+                            width: 210mm;
+                        }
+
+                        .ticket {
+                            border: 1px solid #cbd5e1;
+                            min-height: 250mm;
+                            padding: 18mm 16mm 14mm;
+                            position: relative;
+                            width: 100%;
+                        }
+
+                        .header {
+                            align-items: center;
+                            border-bottom: 1px solid #e2e8f0;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 14px;
+                            padding-bottom: 22px;
+                            text-align: center;
+                        }
+
+                        .logo {
+                            height: 72px;
+                            max-width: 190px;
+                            object-fit: contain;
+                        }
+
+                        h1 {
+                            color: #0f172a;
+                            font-size: 25px;
+                            letter-spacing: 0.08em;
+                            margin: 0;
+                        }
+
+                        .content {
+                            margin: 34px auto 0;
+                            max-width: 560px;
+                        }
+
+                        .field {
+                            border-bottom: 1px solid #e2e8f0;
+                            display: grid;
+                            gap: 18px;
+                            grid-template-columns: 210px 1fr;
+                            padding: 15px 0;
+                        }
+
+                        .label {
+                            color: #475569;
+                            font-size: 14px;
+                            font-weight: 700;
+                        }
+
+                        .value {
+                            color: #0f172a;
+                            font-size: 16px;
+                            font-weight: 600;
+                        }
+
+                        .signature {
+                            margin-left: auto;
+                            margin-top: 54px;
+                            min-height: 90px;
+                            text-align: center;
+                            width: 220px;
+                        }
+
+                        .signature-title {
+                            color: #0f172a;
+                            font-size: 14px;
+                            font-weight: 700;
+                            margin-bottom: 42px;
+                        }
+
+                        .stamp {
+                            border-top: 1px solid #94a3b8;
+                            color: #475569;
+                            font-size: 13px;
+                            padding-top: 10px;
+                        }
+
+                        .note {
+                            bottom: 14mm;
+                            color: #64748b;
+                            font-size: 11px;
+                            left: 16mm;
+                            position: absolute;
+                            right: 16mm;
+                            text-align: center;
+                        }
+
+                        @media print {
+                            body {
+                                background: #ffffff;
+                            }
+
+                            .toolbar {
+                                display: none;
+                            }
+
+                            .page {
+                                margin: 0;
+                                padding: 18mm;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="toolbar">
+                        <button class="print-button" type="button" onclick="window.print()">Imprimer</button>
+                    </div>
+                    <main class="page">
+                        <section class="ticket">
+                            <header class="header">
+                                <img class="logo" src="${logoOFPPT}" alt="Logo de l'établissement" />
+                                <h1>BILLET D'ABSENCE</h1>
+                            </header>
+
+                            <div class="content">
+                                <div class="field">
+                                    <div class="label">Nom du stagiaire</div>
+                                    <div class="value">${escapeHtml(nomComplet)}</div>
+                                </div>
+                                <div class="field">
+                                    <div class="label">Filière</div>
+                                    <div class="value">${escapeHtml(stagiaire.filiere)}</div>
+                                </div>
+                                <div class="field">
+                                    <div class="label">Date de génération</div>
+                                    <div class="value">${escapeHtml(dateGeneration)}</div>
+                                </div>
+                                <div class="field">
+                                    <div class="label">Heure de génération</div>
+                                    <div class="value">${escapeHtml(heureGeneration)}</div>
+                                </div>
+
+                                <div class="signature">
+                                    <div class="signature-title">Signature du responsable</div>
+                                    <div class="stamp">Cachet</div>
+                                </div>
+                            </div>
+
+                            <p class="note">Document généré automatiquement par le système de gestion des absences.</p>
+                        </section>
+                    </main>
+                    <script>
+                        window.onafterprint = function () {
+                            window.close();
+                        };
+                    </script>
+                </body>
+            </html>
+        `);
+        previewWindow.document.close();
+        previewWindow.focus();
     };
 
     return (
@@ -162,6 +405,7 @@ export default function AbsenceJustification({ filters, stagiaire, absences }) {
                                             <th className="px-5 py-3">Horaire</th>
                                             <th className="px-5 py-3">Module</th>
                                             <th className="px-5 py-3">Statut</th>
+                                            <th className="px-5 py-3 text-right">Billet</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 bg-white">
@@ -192,12 +436,26 @@ export default function AbsenceJustification({ filters, stagiaire, absences }) {
                                                         </span>
                                                     )}
                                                 </td>
+                                                <td className="px-5 py-3 text-right">
+                                                    {absence.is_justified ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={generateBillet}
+                                                            className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700"
+                                                        >
+                                                            <FileText className="h-4 w-4" />
+                                                            Générer le billet
+                                                        </button>
+                                                    ) : (
+                                                        <span className="text-xs text-slate-400">-</span>
+                                                    )}
+                                                </td>
                                             </tr>
                                         ))}
 
                                         {absences.length === 0 && (
                                             <tr>
-                                                <td colSpan="5" className="px-5 py-10 text-center text-sm text-slate-500">
+                                                <td colSpan="6" className="px-5 py-10 text-center text-sm text-slate-500">
                                                     Aucune absence trouvee pour cette recherche.
                                                 </td>
                                             </tr>

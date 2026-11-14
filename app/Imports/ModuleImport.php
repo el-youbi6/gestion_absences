@@ -12,17 +12,19 @@ class ModuleImport implements ToModel, WithHeadingRow
     /**
      * @param array $row
      *
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @return \Illuminate\Database\Eloquent\Model
+     *
+     * @throws \Exception
      */
     public function model(array $row)
     {
         if (empty($row['nom']) || empty($row['nom_filiere'])) {
-            return null;
+            throw new \Exception("Le nom du module et le nom de la filière sont requis");
         }
 
         $filiere = Filiere::where('nom', $row['nom_filiere'])->first();
         if (!$filiere) {
-            return null;
+            throw new \Exception("La filière {$row['nom_filiere']} n'existe pas");
         }
 
         return Module::updateOrCreate(

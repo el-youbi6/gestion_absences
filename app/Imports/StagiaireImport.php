@@ -20,12 +20,12 @@ class StagiaireImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
         if (empty($row['nom_group']) || empty($row['email']) || empty($row['nom']) || empty($row['prenom'])) {
-            return null;
+            throw new \Exception("Invalid");
         }
 
         $anneeId = YearService::getSessionYearId();
         if (!$anneeId) {
-            return null;
+            throw new \Exception("Le groupe {$row['nom_group']} n'existe pas");
         }
 
         $groupe = Groupe::where('nom', $row['nom_group'])
@@ -33,7 +33,7 @@ class StagiaireImport implements ToModel, WithHeadingRow
             ->first();
 
         if (!$groupe) {
-            return null;
+            throw new \Exception("Le groupe {$row['nom_group']} n'existe pas");
         }
 
         $user = User::firstOrCreate(

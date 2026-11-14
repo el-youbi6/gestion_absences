@@ -7,10 +7,7 @@ use Illuminate\Support\Facades\Session;
 
 class YearService
 {
-    /**
-     * Calcule l'année scolaire actuelle
-     * Logique: si mois >= 9 => year/(year+1), sinon => (year-1)/year
-     */
+    
     public static function getCurrentYear(): string
     {
         $year = now()->year;
@@ -23,9 +20,7 @@ class YearService
         }
     }
 
-    /**
-     * Récupère ou crée l'année scolaire actuelle
-     */
+    
     public static function getOrCreateCurrentYear()
     {
         $libelle = self::getCurrentYear();
@@ -36,9 +31,7 @@ class YearService
         );
     }
 
-    /**
-     * Initialise la session avec l'année scolaire actuelle
-     */
+    
     public static function initializeSession(): void
     {
         if (!Session::has('annee_scolaire_id')) {
@@ -47,9 +40,7 @@ class YearService
         }
     }
 
-    /**
-     * Récupère l'année scolaire actuelle depuis la session
-     */
+    
     public static function getSessionYear(): ?AnneeScolaire
     {
         $id = Session::get('annee_scolaire_id');
@@ -62,18 +53,13 @@ class YearService
         return AnneeScolaire::find($id);
     }
 
-    /**
-     * Récupère l'ID de l'année scolaire de session
-     */
     public static function getSessionYearId(): ?int
     {
         $annee = self::getSessionYear();
         return $annee?->id;
     }
 
-    /**
-     * Change l'année scolaire active
-     */
+    
     public static function setActiveYear(int $anneeId): void
     {
         $annee = AnneeScolaire::find($anneeId);
@@ -83,9 +69,7 @@ class YearService
         }
     }
 
-    /**
-     * Récupère toutes les années scolaires disponibles
-     */
+
     public static function getAllYears()
     {
         return AnneeScolaire::orderByDesc('libelle')->get();

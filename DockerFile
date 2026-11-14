@@ -1,0 +1,77 @@
+# Étape 1 : Base de travail pour l'application Laravel
+# On part d'une image PHP 8.3 avec Apache pour exécuter le site web.
+FROM php:8.3-apache
+
+# Étape 2 : Répertoire de travail du projet dans le conteneur
+# Tous les fichiers seront copiés dans /var/www/html.
+WORKDIR /var/www/html
+
+# Étape 3 : Installation des dépendances système nécessaires à Laravel
+# Ces paquets permettent d'utiliser la base de données, les fichiers ZIP,
+# les images GD, le traitement des fichiers et les extensions PHP utiles.
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    unzip \
+    libzip-dev \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    libpq-dev \
+    gnupg \
+    ca-certificates \
+    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Étape 4 : Installation de Composer
+# Composer est nécessaire pour télécharger les dépendances PHP du projet.
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Étape 5 : Installation de Node.js et npm
+# Le frontend Laravel utilise Vite, donc on a besoin de Node pour compiler les assets.
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm@latest \
+    && rm -rf /var/lib/apt/lists/*
+
+# Étape 6 : Copie des fichiers de dépendances PHP
+# On copie uniquement composer.json et composer.lock pour installer Laravel avant le reste.
+COPY composer.json composer.lock ./
+
+# Étape 7 : Installation des dépendances PHP du projet
+# Cela télécharge toutes les librairies nécessaires au backend Laravel.
+RUN composer install --no-interaction --no-progress --prefer-dist --no-scripts
+
+# Étape 8 : Copie du code source de l'application
+# On envoie le reste du projet dans le conteneur.
+COPY . .
+
+# Étape 9 : Configuration de l'environnement
+# Si aucun .env n'existe, on copie le modèle afin d'avoir une config basique.
+COPY .env.example .env
+
+# Étape 10 : Génération de la clé de l'application Laravel
+# Sans cette clé, Laravel ne peut pas sécuriser les sessions et les cookies.
+RUN php artisan key:generate
+
+# Étape 11 : Installation des dépendances JavaScript
+# Cela installe React, Vite, Tailwind et autres paquets du frontend.
+RUN npm install --no-fund --no-audit
+
+# Étape 12 : Compilation des assets frontend
+# La commande build génère les fichiers CSS/JS optimisés pour la production.
+RUN npm run build
+
+# Étape 13 : Attribution des droits au dossier de stockage
+# Laravel doit écrire dans storage et bootstrap/cache pour fonctionner correctement.
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Étape 14 : Exposition du port utilisé par l'application
+# Le serveur Laravel est démarré sur le port 8000.
+EXPOSE 8000
+
+# Étape 15 : Lancement de l'application
+# On démarre le serveur interne Laravel pour écouter sur toutes les interfaces.
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

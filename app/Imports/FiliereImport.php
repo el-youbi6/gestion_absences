@@ -11,12 +11,14 @@ class FiliereImport implements ToModel, WithHeadingRow
     /**
      * @param array $row
      *
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @return \Illuminate\Database\Eloquent\Model
+     *
+     * @throws \Exception
      */
     public function model(array $row)
     {
         if (empty($row['nom'])) {
-            return null;
+            throw new \Exception("Le nom de la filière est requis");
         }
 
         return Filiere::firstOrCreate(

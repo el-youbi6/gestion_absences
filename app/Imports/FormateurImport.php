@@ -13,12 +13,14 @@ class FormateurImport implements ToModel, WithHeadingRow
     /**
      * @param array $row
      *
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @return \Illuminate\Database\Eloquent\Model
+     *
+     * @throws \Exception
      */
     public function model(array $row)
     {
         if (empty($row['email']) || empty($row['nom']) || empty($row['prenom'])) {
-            return null;
+            throw new \Exception("Les champs email, nom et prénom sont requis pour le formateur");
         }
 
         $user = User::firstOrCreate(

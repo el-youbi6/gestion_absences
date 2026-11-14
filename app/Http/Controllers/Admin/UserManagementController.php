@@ -53,7 +53,7 @@ class UserManagementController extends Controller
             }
 
             if ($validated['role'] === 'stagiaire') {
-                Stagiaire::updateOrCreate(
+                Stagiaire::firstOrCreate(
                     ['user_id' => $user->id],
                     ['groupe_id' => $validated['groupe_id']]
                 );
@@ -100,12 +100,12 @@ class UserManagementController extends Controller
             ->with(['stagiaire.groupe'])
             ->whereIn('role', ['surveillant', 'stagiaire', 'formateur'])
             ->when(in_array($role, ['surveillant', 'stagiaire', 'formateur'], true), fn($query) => $query->where('role', $role))
-            ->when($cin !== '', fn($query) => $query->where('cin', 'like', "%{$cin}%"))
+            ->when($cin !== '', fn($query) => $query->where('cin',$cin))
             ->orderBy('nom')
             ->orderBy('prenom')
             ->paginate(10)
             ->withQueryString()
-            ->through(fn(User $user) => [
+            ->through(fn($user) => [
                 'id' => $user->id,
                 'nom' => $user->nom,
                 'prenom' => $user->prenom,

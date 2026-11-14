@@ -23,7 +23,7 @@ class ImportController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls',
+            'file' => 'required|mimes:xlsx',
             'type' => 'required|in:global,stagiaires,groupes',
         ]);
 
@@ -32,6 +32,7 @@ class ImportController extends Controller
         $anneeId = YearService::getSessionYearId();
 
         if (!$anneeId) {
+            
             return back()->with('error', 'Aucune annee scolaire active trouvee.');
         }
 
