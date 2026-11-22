@@ -1,58 +1,253 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# 🎓 Gestion des Absences des Stagiaires
 
-## About Laravel
+Application web de gestion et de suivi des absences des stagiaires dans un établissement de formation professionnelle.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Ce projet vise à digitaliser la gestion des absences en remplaçant les méthodes traditionnelles (papier, fichiers Excel) par une plateforme centralisée, moderne et accessible selon le rôle de chaque utilisateur.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📌 Présentation du projet
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+L'application permet aux formateurs d'enregistrer les absences pendant leurs séances de formation et aux responsables administratifs de suivre, justifier et analyser ces absences.
 
-## Learning Laravel
+Elle intègre également la gestion des années scolaires, des utilisateurs, des groupes, des filières, des modules et des affectations des formateurs.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🎯 Objectifs
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- Digitaliser le processus de gestion des absences.
+- Centraliser les informations des stagiaires.
+- Faciliter la saisie des absences par les formateurs.
+- Simplifier le traitement des justifications.
+- Générer des statistiques et des rapports.
+- Organiser les données par année scolaire.
+- Sécuriser l'accès aux fonctionnalités selon les rôles.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 👥 Rôles des utilisateurs
 
-## Agentic Development
+| Rôle | Responsabilités |
+|------|----------------|
+| Administrateur | Gestion des utilisateurs et administration du système |
+| Surveillant | Suivi, justification et statistiques des absences |
+| Formateur | Saisie des absences et consultation des rapports par module |
+| Stagiaire | Consultation de son historique d'absences |
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## ⚙️ Fonctionnalités principales
+
+### 🔐 Authentification et autorisation
+- Connexion sécurisée.
+- Gestion des accès selon les rôles.
+- Protection des routes avec des middlewares Laravel.
+
+### 👤 Gestion des utilisateurs
+- Ajouter un utilisateur.
+- Modifier les informations d'un utilisateur.
+- Supprimer un utilisateur.
+- Gérer les profils des stagiaires et des formateurs.
+
+### 📚 Gestion des données pédagogiques
+- Gestion des filières.
+- Gestion des groupes.
+- Gestion des modules.
+- Affectation des groupes et modules aux formateurs.
+
+### 📥 Importation Excel
+- Importation globale des données.
+- Importation des stagiaires.
+- Importation des groupes.
+- Importation des affectations des formateurs.
+
+### 📝 Saisie des absences
+- Sélection de la filière.
+- Sélection du groupe et du module.
+- Sélection de la date.
+- Choix des horaires de séance.
+- Enregistrement des stagiaires absents.
+
+### ✅ Justification des absences
+- Recherche d'un stagiaire par CIN.
+- Consultation de ses absences.
+- Filtrage par période.
+- Sélection et justification de plusieurs absences.
+
+### 📊 Rapports et statistiques
+- Statistiques générales des absences.
+- Rapport des absences par module.
+- Nombre d'absences justifiées et non justifiées.
+- Historique des absences des stagiaires.
+
+### 📅 Gestion des années scolaires
+- Détermination automatique de l'année scolaire actuelle.
+- Changement de l'année scolaire sélectionnée.
+- Organisation des données par année scolaire.
+
+## 🛠️ Technologies utilisées
+
+| Catégorie | Technologies |
+|-----------|-------------|
+| Backend | PHP, Laravel |
+| Frontend | React.js (JavaScript) |
+| Communication | Inertia.js |
+| Base de données | MySQL |
+| Interface | Tailwind CSS |
+| ORM | Eloquent |
+| Importation Excel | Laravel Excel |
+| Icônes | Lucide React |
+| Build Tool | Vite |
+| Gestion des dépendances | Composer, npm |
+
+## 📸 Captures d'écran
+
+### Aperçu 1
+
+![Capture 1](demo/Screenshot%202026-06-07%20220331.png)
+
+### Aperçu 2
+
+![Capture 2](demo/Screenshot%202026-06-07%20220609.png)
+
+### Aperçu 3
+
+![Capture 3](demo/Screenshot%202026-06-07%20221438.png)
+
+### Aperçu 4
+
+![Capture 4](demo/Screenshot%202026-06-07%20222355.png)
+
+## 🚀 Installation du projet
+
+### 1. Prérequis
+
+Avant de commencer, installer :
+
+- PHP
+- Composer
+- Node.js et npm
+- MySQL
+- Git
+
+### 2. Cloner le repository
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/el-youbi6/gestion_absences.git
+cd gestion_absences
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 3. Installer les dépendances PHP
 
-## Contributing
+```bash
+composer install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Installer les dépendances JavaScript
 
-## Code of Conduct
+```bash
+npm install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 5. Configurer l'environnement
 
-## Security Vulnerabilities
+Créer le fichier `.env` à partir de `.env.example`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+cp .env.example .env
+```
 
-## License
+Générer la clé Laravel :
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan key:generate
+```
+
+### 6. Configurer la base de données
+
+Créer une base de données MySQL, puis modifier les paramètres dans `.env` :
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=gestion_absences
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Adapter ces valeurs selon votre environnement.
+
+### 7. Exécuter les migrations
+
+```bash
+php artisan migrate
+```
+
+### 8. Démarrer le backend
+
+```bash
+php artisan serve
+```
+
+### 9. Démarrer le frontend
+
+Dans un deuxième terminal :
+
+```bash
+npm run dev
+```
+
+### 10. Accéder à l'application
+
+Ouvrir dans le navigateur :
+
+http://localhost:8000/login
+
+**Remarque :** des comptes utilisateurs et des données pédagogiques sont nécessaires pour tester les différentes fonctionnalités.
+
+## 📁 Structure du projet
+
+```text
+gestion_absences/
+│
+├── app/
+│   ├── Http/
+│   │   └── Controllers/
+│   ├── Models/
+│   ├── Imports/
+│   └── Services/
+│
+├── database/
+│   └── migrations/
+│
+├── resources/
+│   ├── css/
+│   └── js/
+│       ├── Components/
+│       ├── Layouts/
+│       └── Pages/
+│
+├── routes/
+│   └── web.php
+│
+├── demo/
+│   └── Captures d'écran
+│
+├── public/
+├── composer.json
+├── package.json
+└── README.md
+```
+
+## 🔄 Fonctionnement général
+
+1. L'administrateur prépare les utilisateurs et les données pédagogiques.
+2. Les formateurs sont affectés aux groupes et aux modules.
+3. Les formateurs enregistrent les absences des stagiaires.
+4. Les surveillants consultent et justifient les absences.
+5. Les responsables consultent les statistiques.
+6. Les stagiaires peuvent suivre leur historique d'absences.
+
+## 👨‍💻 Auteur
+
+**Développeur :** [el-youbi6](https://github.com/el-youbi6)
+
+**Projet :** Gestion des Absences des Stagiaires
+
+**Technologies principales :** Laravel, React, Inertia.js et MySQL.
+
